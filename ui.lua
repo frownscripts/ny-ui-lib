@@ -1105,23 +1105,63 @@ function lib:Create(ver, size, hidekey)
 		PageItems.Visible = true
 
 		local function BuildItems()
+			local LeftPanel = Instance.new("Frame")
+			LeftPanel.Name = "LeftPanel"
+			LeftPanel.Parent = PageItems
+			LeftPanel.AnchorPoint = Vector2.new(0, 0.5)
+			LeftPanel.BackgroundColor3 = Color3.fromRGB(23, 20, 46)
+			LeftPanel.BackgroundTransparency = 0.75
+			LeftPanel.BorderSizePixel = 0
+			LeftPanel.Position = UDim2.new(0, 6, 0.5, 0)
+			LeftPanel.Size = UDim2.new(0.5, -12, 1, -12)
+			LeftPanel.Active = false
+
+			local LeftPanelCorner = Instance.new("UICorner")
+			LeftPanelCorner.CornerRadius = UDim.new(0, 6)
+			LeftPanelCorner.Parent = LeftPanel
+
+			local LeftPanelStroke = Instance.new("UIStroke")
+			LeftPanelStroke.Parent = LeftPanel
+			LeftPanelStroke.Color = Color3.fromRGB(31, 26, 61)
+			LeftPanelStroke.Thickness = 1
+			LeftPanelStroke.Transparency = 0.25
+			LeftPanelStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+			local LeftPanelTitle = Instance.new("TextLabel")
+			LeftPanelTitle.Name = "SectionTitle"
+			LeftPanelTitle.Parent = LeftPanel
+			LeftPanelTitle.BackgroundTransparency = 1
+			LeftPanelTitle.Position = UDim2.new(0, 12, 0, 8)
+			LeftPanelTitle.Size = UDim2.new(1, -24, 0, 16)
+			LeftPanelTitle.Font = Enum.Font.GothamBold
+			LeftPanelTitle.Text = "LEFT"
+			LeftPanelTitle.TextColor3 = Color3.fromRGB(155, 155, 155)
+			LeftPanelTitle.TextSize = 12
+			LeftPanelTitle.TextXAlignment = Enum.TextXAlignment.Left
+
 			local Left = Instance.new("ScrollingFrame")
 			Left.Name = "Left"
-			Left.ClipsDescendants = false
-			Left.Parent = PageItems
-			Left.AnchorPoint = Vector2.new(0, 0.5)
-			Left.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			Left.ClipsDescendants = true
+			Left.Parent = LeftPanel
+			Left.AnchorPoint = Vector2.new(0, 0)
 			Left.BackgroundTransparency = 1.000
-			Left.Position = UDim2.new(0, 0, 0.5, 0)
-			Left.Size = UDim2.new(0.5, 0, 1, 0)
+			Left.Position = UDim2.new(0, 0, 0, 28)
+			Left.Size = UDim2.new(1, 0, 1, -28)
 			Left.Visible = true
-			--Left.ZIndex = 4
-			-- 
 			Left.BorderSizePixel = 0
 			Left.ScrollBarImageColor3 = Color3.new(0.254902, 0.254902, 0.254902)
 			Left.CanvasSize = UDim2.new(0, 0, 0, 0)
 			Left.ScrollBarThickness = 0
+			Left.ScrollingDirection = Enum.ScrollingDirection.Y
+			Left.ElasticBehavior = Enum.ElasticBehavior.Never
 			Left.BorderColor3 = Color3.new(0, 0, 0)
+
+			local LeftPad = Instance.new("UIPadding")
+			LeftPad.Parent = Left
+			LeftPad.PaddingTop = UDim.new(0, 6)
+			LeftPad.PaddingBottom = UDim.new(0, 6)
+			LeftPad.PaddingLeft = UDim.new(0, 6)
+			LeftPad.PaddingRight = UDim.new(0, 6)
 
 			local LeftListing = Instance.new("UIListLayout")
 			LeftListing.Name = "LeftListing"
@@ -1130,21 +1170,62 @@ function lib:Create(ver, size, hidekey)
 			LeftListing.SortOrder = Enum.SortOrder.LayoutOrder
 			LeftListing.Padding = UDim.new(0, 1)
 			
+			local RightPanel = Instance.new("Frame")
+			RightPanel.Name = "RightPanel"
+			RightPanel.Parent = PageItems
+			RightPanel.AnchorPoint = Vector2.new(1, 0.5)
+			RightPanel.BackgroundColor3 = Color3.fromRGB(23, 20, 46)
+			RightPanel.BackgroundTransparency = 0.75
+			RightPanel.BorderSizePixel = 0
+			RightPanel.Position = UDim2.new(1, -6, 0.5, 0)
+			RightPanel.Size = UDim2.new(0.5, -12, 1, -12)
+			RightPanel.Active = false
+
+			local RightPanelCorner = Instance.new("UICorner")
+			RightPanelCorner.CornerRadius = UDim.new(0, 6)
+			RightPanelCorner.Parent = RightPanel
+
+			local RightPanelStroke = Instance.new("UIStroke")
+			RightPanelStroke.Parent = RightPanel
+			RightPanelStroke.Color = Color3.fromRGB(31, 26, 61)
+			RightPanelStroke.Thickness = 1
+			RightPanelStroke.Transparency = 0.25
+			RightPanelStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+			local RightPanelTitle = Instance.new("TextLabel")
+			RightPanelTitle.Name = "SectionTitle"
+			RightPanelTitle.Parent = RightPanel
+			RightPanelTitle.BackgroundTransparency = 1
+			RightPanelTitle.Position = UDim2.new(0, 12, 0, 8)
+			RightPanelTitle.Size = UDim2.new(1, -24, 0, 16)
+			RightPanelTitle.Font = Enum.Font.GothamBold
+			RightPanelTitle.Text = "RIGHT"
+			RightPanelTitle.TextColor3 = Color3.fromRGB(155, 155, 155)
+			RightPanelTitle.TextSize = 12
+			RightPanelTitle.TextXAlignment = Enum.TextXAlignment.Left
+
 			local Right = Instance.new("ScrollingFrame")
 			Right.Name = "Right"
-			Right.ClipsDescendants = false
-			Right.Parent = PageItems
-			Right.AnchorPoint = Vector2.new(1, 0.5)
-			Right.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			Right.ClipsDescendants = true
+			Right.Parent = RightPanel
+			Right.AnchorPoint = Vector2.new(0, 0)
 			Right.BackgroundTransparency = 1.000
-			Right.Position = UDim2.new(1, -1, 0.5, 0)
-			Right.Size = UDim2.new(0.5, -2, 1, 0)
+			Right.Position = UDim2.new(0, 0, 0, 28)
+			Right.Size = UDim2.new(1, 0, 1, -28)
 			Right.Visible = true
-			--Right.ZIndex = 4
 			Right.BorderSizePixel = 0
 			Right.CanvasSize = UDim2.new(0, 0, 0, 0)
 			Right.ScrollBarThickness = 0
+			Right.ScrollingDirection = Enum.ScrollingDirection.Y
+			Right.ElasticBehavior = Enum.ElasticBehavior.Never
 			Right.BorderColor3 = Color3.new(0, 0, 0)
+
+			local RightPad = Instance.new("UIPadding")
+			RightPad.Parent = Right
+			RightPad.PaddingTop = UDim.new(0, 6)
+			RightPad.PaddingBottom = UDim.new(0, 6)
+			RightPad.PaddingLeft = UDim.new(0, 6)
+			RightPad.PaddingRight = UDim.new(0, 6)
 
 			local RightListing = Instance.new("UIListLayout")
 			RightListing.Name = "RightListing"
@@ -1192,9 +1273,14 @@ function lib:Create(ver, size, hidekey)
 			function items:Label(side, text, image)
 				local Label = Instance.new("Frame")
 				Label.Name = tostring(text)
-				Label.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Label.BackgroundColor3 = Color3.fromRGB(23, 20, 46)
+				Label.BackgroundTransparency = 0.35
 				Label.BorderSizePixel = 0
 				Label.Size = UDim2.new(1, 0, 0, 36)
+
+				local LabelCorner = Instance.new("UICorner")
+				LabelCorner.CornerRadius = UDim.new(0, 6)
+				LabelCorner.Parent = Label
 
 				local LabelOutline = Instance.new("UIStroke")
 				LabelOutline.Enabled = true
@@ -1203,7 +1289,7 @@ function lib:Create(ver, size, hidekey)
 				LabelOutline.LineJoinMode = Enum.LineJoinMode.Miter
 				LabelOutline.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
 				LabelOutline.Thickness = 1
-				LabelOutline.Transparency = 1
+				LabelOutline.Transparency = 0.25
 
 				local LabelTitle = Instance.new("TextLabel")
 				LabelTitle.Name = "LabelTitle"
@@ -1235,7 +1321,7 @@ function lib:Create(ver, size, hidekey)
 
 				local LabelGradient = Instance.new("UIGradient")
 				LabelGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(23, 20, 46)), ColorSequenceKeypoint.new(0.08, Color3.fromRGB(26, 23, 56)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(26, 23, 56))}
-				LabelGradient.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0.00, 1.00), NumberSequenceKeypoint.new(1.00, 0.25)}
+				LabelGradient.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0.00, 0.85), NumberSequenceKeypoint.new(1.00, 0.10)}
 				LabelGradient.Name = "LabelGradient"
 				LabelGradient.Parent = Label
 
@@ -1539,6 +1625,7 @@ function lib:Create(ver, size, hidekey)
 				local Color = Instance.new("ImageLabel")
 				Color.Name = "Color"
 				Color.Parent = ColorpickerFrame
+				Color.Active = true
 				Color.BackgroundColor3 = preset
 				Color.BorderSizePixel = 0
 				Color.Position = UDim2.new(0, 9, 0, 9)
@@ -1567,6 +1654,7 @@ function lib:Create(ver, size, hidekey)
 				Hue.Name = "Hue"
 				Hue.ZIndex = 104
 				Hue.Parent = ColorpickerFrame
+				Hue.Active = true
 				Hue.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				Hue.Position = UDim2.new(0, 157, 0, 9)
 				Hue.Size = UDim2.new(0, 9, 0, 134)
@@ -1618,8 +1706,22 @@ function lib:Create(ver, size, hidekey)
 				Color.BackgroundColor3 = preset
 				pcall(callback, BoxColor.BackgroundColor3)
 
+				local function setScrollEnabled(enabled)
+					pcall(function()
+						if Left and Left:IsA("ScrollingFrame") then
+							Left.ScrollingEnabled = enabled
+						end
+					end)
+					pcall(function()
+						if Right and Right:IsA("ScrollingFrame") then
+							Right.ScrollingEnabled = enabled
+						end
+					end)
+				end
+
 				Color.InputBegan:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+						setScrollEnabled(false)
 						if ColorInput then
 							ColorInput:Disconnect()
 						end
@@ -1639,10 +1741,12 @@ function lib:Create(ver, size, hidekey)
 						if ColorInput then
 							ColorInput:Disconnect()
 						end
+						setScrollEnabled(true)
 					end
 				end)
 				Hue.InputBegan:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+						setScrollEnabled(false)
 						if HueInput then
 							HueInput:Disconnect()
 						end
@@ -1660,6 +1764,7 @@ function lib:Create(ver, size, hidekey)
 						if HueInput then
 							HueInput:Disconnect()
 						end
+						setScrollEnabled(true)
 					end
 				end)
 				local function colorpickerToggleOFF()
