@@ -2176,7 +2176,7 @@ function lib:Create(ver, size, hidekey)
 				Slider.BackgroundTransparency = 1.000
 				Slider.BorderColor3 = Color3.fromRGB(27, 42, 53)
 				Slider.BorderSizePixel = 0
-				Slider.Size = UDim2.new(1, 0, 0, 36)
+				Slider.Size = UDim2.new(1, 0, 0, 48)
 
 				local SliderOutline = Instance.new("UIStroke")
 				SliderOutline.Enabled = true
@@ -2187,30 +2187,32 @@ function lib:Create(ver, size, hidekey)
 				SliderOutline.Thickness = 1
 				SliderOutline.Transparency = 1
 
+				-- Label sits at the TOP of the slider row
 				local SliderTitle = Instance.new("TextLabel")
 				SliderTitle.Name = "SliderTitle"
 				SliderTitle.Parent = Slider
-				SliderTitle.AnchorPoint = Vector2.new(0, 0.5)
+				SliderTitle.AnchorPoint = Vector2.new(0, 0)
 				SliderTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				SliderTitle.BackgroundTransparency = 1.000
-				SliderTitle.ClipsDescendants = true
-				SliderTitle.Position = UDim2.new(0, 21, 0.5, 0)
-				SliderTitle.Size = UDim2.new(0, 180, 1, 0)
+				SliderTitle.ClipsDescendants = false
+				SliderTitle.Position = UDim2.new(0, 10, 0, 5)
+				SliderTitle.Size = UDim2.new(1, -80, 0, 16)
 				SliderTitle.Font = Enum.Font.GothamMedium
 				SliderTitle.Text = text
 				SliderTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 				SliderTitle.TextSize = 12.000
 				SliderTitle.TextXAlignment = Enum.TextXAlignment.Left
 
+				-- Track sits in the BOTTOM half of the row
 				local SlideBack = Instance.new("Frame")
 				SlideBack.Name = "SlideBack"
 				SlideBack.Parent = Slider
 				SlideBack.Active = true
-				SlideBack.AnchorPoint = Vector2.new(1, 0.5)
+				SlideBack.AnchorPoint = Vector2.new(0, 1)
 				SlideBack.BackgroundColor3 = Color3.fromRGB(33, 28, 64)
 				SlideBack.BorderSizePixel = 0
-				SlideBack.Position = UDim2.new(1, -62, 0.5, 0)
-				SlideBack.Size = UDim2.new(0, 130, 0, 2)
+				SlideBack.Position = UDim2.new(0, 10, 1, -10)
+				SlideBack.Size = UDim2.new(1, -50, 0, 2)
 
 				local SlideCircle = Instance.new("Frame")
 				SlideCircle.Name = "SlideCircle"
@@ -2247,8 +2249,9 @@ function lib:Create(ver, size, hidekey)
 				SliderValue.Parent = Slider
 				SliderValue.BackgroundColor3 = Color3.fromRGB(61, 34, 134)
 				SliderValue.BackgroundTransparency = 0.810
-				SliderValue.Position = UDim2.new(0.797999978, 21, 0.222000003, 0)
-				SliderValue.Size = UDim2.new(0, 27, 0, 16)
+				SliderValue.AnchorPoint = Vector2.new(1, 0)
+				SliderValue.Position = UDim2.new(1, -6, 0, 5)
+				SliderValue.Size = UDim2.new(0, 36, 0, 16)
 				SliderValue.Font = Enum.Font.Gotham
 				SliderValue.Text = min
 				SliderValue.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -2530,17 +2533,18 @@ function lib:Create(ver, size, hidekey)
 				local itemH = 23
 				local listH = math.min(#options * (itemH + 1), 160)
 
+				-- Dropdown list is parented directly to Vice (root ScreenGui)
+				-- so it always renders on top and is NEVER clipped by scroll frames.
 				local DropdownChildFrameOutline = Instance.new("Frame")
 				DropdownChildFrameOutline.Name = "DropdownChildFrame"
-				DropdownChildFrameOutline.Parent = DropdownDropFrame
+				DropdownChildFrameOutline.Parent = Vice
 				DropdownChildFrameOutline.AnchorPoint = Vector2.new(0, 0)
 				DropdownChildFrameOutline.BackgroundColor3 = Color3.fromRGB(34, 28, 64)
-				-- sit right below the header row (full height of DropdownDropFrame + 4px gap)
-				DropdownChildFrameOutline.Position = UDim2.new(0, 0, 1, 4)
-				DropdownChildFrameOutline.Size = UDim2.new(1, 0, 0, listH + 4)
+				DropdownChildFrameOutline.Position = UDim2.new(0, 0, 0, 0)
+				DropdownChildFrameOutline.Size = UDim2.new(0, 173, 0, listH + 4)
 				DropdownChildFrameOutline.BackgroundTransparency = 1
 				DropdownChildFrameOutline.Visible = false
-				DropdownChildFrameOutline.ZIndex = 99
+				DropdownChildFrameOutline.ZIndex = 500
 				DropdownChildFrameOutline.ClipsDescendants = false
 
 				local DropdownChildFrameOutlineCorner = Instance.new("UICorner")
@@ -2556,7 +2560,7 @@ function lib:Create(ver, size, hidekey)
 				DropdownChildFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 				DropdownChildFrame.Size = UDim2.new(1, -2, 1, -2)
 				DropdownChildFrame.BackgroundTransparency = 1
-				DropdownChildFrame.ZIndex = 99
+				DropdownChildFrame.ZIndex = 500
 
 				local DropdownChildFrameCorner = Instance.new("UICorner")
 				DropdownChildFrameCorner.CornerRadius = UDim.new(0, 4)
@@ -2577,7 +2581,7 @@ function lib:Create(ver, size, hidekey)
 				DropdownChildFrameScroll.ScrollBarImageColor3 = Color3.fromRGB(107, 89, 222)
 				DropdownChildFrameScroll.ScrollingDirection = Enum.ScrollingDirection.Y
 				DropdownChildFrameScroll.ElasticBehavior = Enum.ElasticBehavior.Never
-				DropdownChildFrameScroll.ZIndex = 99
+				DropdownChildFrameScroll.ZIndex = 500
 
 				local DropdownChildFrameScrollListing = Instance.new("UIListLayout")
 				DropdownChildFrameScrollListing.Name = "DropdownChildFrameScrollListing"
@@ -2600,7 +2604,14 @@ function lib:Create(ver, size, hidekey)
 				local debounce = false
 				local opened
 
+				local function updateOverlayPosition()
+					local abs = DropdownDropFrame.AbsolutePosition
+					local sz  = DropdownDropFrame.AbsoluteSize
+					DropdownChildFrameOutline.Position = UDim2.new(0, abs.X, 0, abs.Y + sz.Y + 4)
+				end
+
 				local function toggle()
+					updateOverlayPosition()
 					DropdownChildFrameOutline.Visible = true
 					if (debounce) then return end
 
@@ -2700,7 +2711,7 @@ function lib:Create(ver, size, hidekey)
 					DropdownBtn.TextSize = 14.000
 					DropdownBtn.AutoButtonColor = false
 					DropdownBtn.BackgroundTransparency = 1
-					DropdownBtn.ZIndex = 99
+					DropdownBtn.ZIndex = 500
 
 					local DropdownBtnTitle = Instance.new("TextLabel")
 					DropdownBtnTitle.Name = "DropdownBtnTitle"
@@ -2717,7 +2728,7 @@ function lib:Create(ver, size, hidekey)
 					DropdownBtnTitle.TextSize = 12.000
 					DropdownBtnTitle.TextXAlignment = Enum.TextXAlignment.Left
 					DropdownBtnTitle.TextTransparency = 1
-					DropdownBtnTitle.ZIndex = 99
+					DropdownBtnTitle.ZIndex = 500
 
 					local DropdownBtnCorner = Instance.new("UICorner")
 					DropdownBtnCorner.CornerRadius = UDim.new(0, 4)
