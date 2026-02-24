@@ -2789,6 +2789,14 @@ function lib:Create(ver, size, hidekey)
 		end
 		return BuildItems()
 	end
+
+	function tabs:SetLogo(assetId)
+		local logo = LeftBarBack:FindFirstChild("vhlogo")
+		if logo then
+			logo.Image = "rbxassetid://" .. tostring(assetId)
+		end
+	end
+
 	return tabs
 end
 function lib:Notify(title, desc, dur)
