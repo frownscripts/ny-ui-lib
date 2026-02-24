@@ -10,6 +10,7 @@ if not game:IsLoaded() then game.Loaded:wait() end
 if game.CoreGui:FindFirstChild("Vice") then game.CoreGui:FindFirstChild("Vice"):Destroy() end 
 if game.CoreGui:FindFirstChild("NotifsGui") then game.CoreGui:FindFirstChild("NotifsGui"):Destroy() end
 if game.CoreGui:FindFirstChild("WatermarkUI") then game.CoreGui:FindFirstChild("WatermarkUI"):Destroy() end
+if game.CoreGui:FindFirstChild("ViceToggle") then game.CoreGui:FindFirstChild("ViceToggle"):Destroy() end
 
 local UserInputService = game:GetService('UserInputService')
 local InputService = game:GetService('UserInputService')
@@ -279,6 +280,7 @@ function lib:Destroy()
 	pcall(function() if CoreGui:FindFirstChild("Vice") then CoreGui.Vice:Destroy() end end)
 	pcall(function() if CoreGui:FindFirstChild("NotifsGui") then CoreGui.NotifsGui:Destroy() end end)
 	pcall(function() if CoreGui:FindFirstChild("WatermarkUI") then CoreGui.WatermarkUI:Destroy() end end)
+	pcall(function() if CoreGui:FindFirstChild("ViceToggle") then CoreGui.ViceToggle:Destroy() end end)
 end
 
 ---HOLDERS---
@@ -353,6 +355,103 @@ function lib:Create(ver, size, hidekey)
 		if cam and cam.GetPropertyChangedSignal then
 			table.insert(LibraryFunctions.Connections, cam:GetPropertyChangedSignal("ViewportSize"):Connect(applyScale))
 		end
+	end)
+
+	-- Top-right draggable toggle button (outside main UI)
+	pcall(function()
+		local existing = (RunService:IsStudio() and LocalPlayer.PlayerGui or CoreGui):FindFirstChild("ViceToggle")
+		if existing then existing:Destroy() end
+	end)
+	local ViceToggle = Instance.new("ScreenGui")
+	ViceToggle.Name = "ViceToggle"
+	ViceToggle.Parent = RunService:IsStudio() and LocalPlayer.PlayerGui or CoreGui
+	ViceToggle.ZIndexBehavior = Enum.ZIndexBehavior.Global
+	ViceToggle.IgnoreGuiInset = true
+	ViceToggle.ResetOnSpawn = false
+
+	local ToggleButton = Instance.new("TextButton")
+	ToggleButton.Name = "ToggleButton"
+	ToggleButton.Parent = ViceToggle
+	ToggleButton.AnchorPoint = Vector2.new(1, 0)
+	ToggleButton.Position = UDim2.new(1, -16, 0, 16)
+	ToggleButton.Size = UDim2.fromOffset(54, 54)
+	ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	ToggleButton.BorderSizePixel = 0
+	ToggleButton.AutoButtonColor = false
+	ToggleButton.Text = "UI"
+	ToggleButton.Font = Enum.Font.GothamBold
+	ToggleButton.TextSize = 14
+	ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	ToggleButton.Active = true
+	ToggleButton.Selectable = true
+
+	local ToggleCorner = Instance.new("UICorner")
+	ToggleCorner.CornerRadius = UDim.new(0, 10)
+	ToggleCorner.Parent = ToggleButton
+
+	local togglePressInput = nil
+	local toggleMoveInput = nil
+	local toggleDownPos = nil
+	local toggleStartPos = nil
+	task.spawn(function()
+		local isDown = false
+		local isDragging = false
+		local dragThreshold = 6
+
+		ToggleButton.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				isDown = true
+				isDragging = false
+				togglePressInput = input
+				toggleDownPos = input.Position
+				toggleStartPos = ToggleButton.Position
+			end
+		end)
+
+		ToggleButton.InputChanged:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+				toggleMoveInput = input
+			end
+		end)
+
+		LibraryFunctions:Connect(UserInputService.InputChanged, function(input)
+			if not isDown then return end
+			if not toggleDownPos or not toggleStartPos then return end
+
+			local canMove = false
+			if togglePressInput and togglePressInput.UserInputType == Enum.UserInputType.MouseButton1 then
+				canMove = (input.UserInputType == Enum.UserInputType.MouseMovement)
+			else
+				canMove = (toggleMoveInput ~= nil and input == toggleMoveInput)
+			end
+			if not canMove then return end
+
+			local delta = input.Position - toggleDownPos
+			if not isDragging and (math.abs(delta.X) > dragThreshold or math.abs(delta.Y) > dragThreshold) then
+				isDragging = true
+			end
+			ToggleButton.Position = UDim2.new(
+				toggleStartPos.X.Scale,
+				toggleStartPos.X.Offset + delta.X,
+				toggleStartPos.Y.Scale,
+				toggleStartPos.Y.Offset + delta.Y
+			)
+		end)
+
+		LibraryFunctions:Connect(UserInputService.InputEnded, function(input)
+			if not isDown then return end
+			if input ~= togglePressInput then return end
+			isDown = false
+			local wasDragging = isDragging
+			isDragging = false
+			togglePressInput = nil
+			toggleMoveInput = nil
+			toggleDownPos = nil
+			toggleStartPos = nil
+			if not wasDragging then
+				Vice.Enabled = not Vice.Enabled
+			end
+		end)
 	end)
 	local PromptContainer = Instance.new('TextButton')
 	PromptContainer.Size = UDim2.new(1,0,1,0)
@@ -961,23 +1060,6 @@ function lib:Create(ver, size, hidekey)
 		PageCont.Position = UDim2.new(0, 0, 0, 70)
 		PageCont.Size = UDim2.new(1, 0, 1, -70)
 
-		local AllSubTabBtns = Instance.new("Frame")
-		AllSubTabBtns.Name = "AllSubTabBtns"
-		AllSubTabBtns.Parent = PageCont
-		AllSubTabBtns.AnchorPoint = Vector2.new(0.5, 0)
-		AllSubTabBtns.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		AllSubTabBtns.BackgroundTransparency = 1.000
-		AllSubTabBtns.Position = UDim2.new(0.5, 0, 0, 0)
-		AllSubTabBtns.Size = UDim2.new(1, -40, 0, 30)
-
-		local AllSubTabBtnsListing = Instance.new("UIListLayout")
-		AllSubTabBtnsListing.Name = "AllSubTabBtnsListing"
-		AllSubTabBtnsListing.Parent = AllSubTabBtns
-		AllSubTabBtnsListing.FillDirection = Enum.FillDirection.Horizontal
-		AllSubTabBtnsListing.SortOrder = Enum.SortOrder.LayoutOrder
-		AllSubTabBtnsListing.VerticalAlignment = Enum.VerticalAlignment.Center
-		AllSubTabBtnsListing.Padding = UDim.new(0, 5)
-
 		TabInteract.Activated:Connect(function()
 			for i, v in next, AllPagesFolder:GetChildren() do
 				coroutine.wrap(function()
@@ -1012,110 +1094,27 @@ function lib:Create(ver, size, hidekey)
 			game.TweenService:Create(TabHighlight, TweenInfo.new(lib.Animations.AnimSpeed, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 4, 1, 0)}):Play()
 		end)
 
-		local subtabs = {}
-
 		local PageItems = Instance.new("Frame")
 		PageItems.Name = "PageItems"
 		PageItems.Parent = PageCont
-		PageItems.AnchorPoint = Vector2.new(0.5, 1)
+		PageItems.AnchorPoint = Vector2.new(0.5, 0)
 		PageItems.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		PageItems.BackgroundTransparency = 1.000
-		PageItems.Position = UDim2.new(0.5, 0, 1, 0)
-		PageItems.Size = UDim2.new(1, 0, 1, -44)
+		PageItems.Position = UDim2.new(0.5, 0, 0, 0)
+		PageItems.Size = UDim2.new(1, 0, 1, 0)
 		PageItems.Visible = true
 
-		local AllSubPagesFolder = Instance.new("Folder")
-		AllSubPagesFolder.Name = "AllSubPagesFolder"
-		AllSubPagesFolder.Parent = PageItems
-
-		function subtabs:SubTab(title, AssID)
-			local SubTabBtnOutline = Instance.new("Frame")
-			SubTabBtnOutline.Name = "SubTabBtnOutline"
-			SubTabBtnOutline.Parent = AllSubTabBtns
-			SubTabBtnOutline.BackgroundColor3 = Color3.fromRGB(107, 89, 222)
-			SubTabBtnOutline.Size = UDim2.new(0, 110, 1, -4)
-
-			local SubTabBtnOutlineCorner = Instance.new("UICorner")
-			SubTabBtnOutlineCorner.CornerRadius = UDim.new(0, 4)
-			SubTabBtnOutlineCorner.Name = "SubTabBtnOutlineCorner"
-			SubTabBtnOutlineCorner.Parent = SubTabBtnOutline
-
-			local SubTabBtnInline = Instance.new("Frame")
-			SubTabBtnInline.Name = "SubTabBtnInline"
-			SubTabBtnInline.Parent = SubTabBtnOutline
-			SubTabBtnInline.AnchorPoint = Vector2.new(0.5, 0.5)
-			SubTabBtnInline.BackgroundColor3 = Color3.fromRGB(23, 20, 41)
-			SubTabBtnInline.Position = UDim2.new(0.5, 0, 0.5, 0)
-			SubTabBtnInline.Size = UDim2.new(1, -2, 1, -2)
-
-			local SubTabBtnInteract = Instance.new("TextButton")
-			SubTabBtnInteract.Name = "SubTabBtnInteract"
-			SubTabBtnInteract.Parent = SubTabBtnInline
-			SubTabBtnInteract.AnchorPoint = Vector2.new(0.5, 0.5)
-			SubTabBtnInteract.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			SubTabBtnInteract.BackgroundTransparency = 1.000
-			SubTabBtnInteract.Position = UDim2.new(0.5, 0, 0.5, 0)
-			SubTabBtnInteract.Size = UDim2.new(1, 0, 1, 0)
-			SubTabBtnInteract.Font = Enum.Font.Gotham
-			SubTabBtnInteract.Text = ""
-			SubTabBtnInteract.TextColor3 = Color3.fromRGB(255, 255, 255)
-			SubTabBtnInteract.TextSize = 12.000
-			SubTabBtnInteract.TextXAlignment = Enum.TextXAlignment.Right
-
-			SubTabBtnInteract.MouseEnter:Connect(function()
-				TweenService:Create(SubTabBtnOutline, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(58, 49, 110)}):Play()
-			end)
-
-			SubTabBtnInteract.MouseLeave:Connect(function()
-				TweenService:Create(SubTabBtnOutline, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(107, 89, 222)}):Play()
-			end)
-
-			SubTabBtnInteract.InputBegan:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-				TweenService:Create(SubTabBtnOutline, TweenInfo.new(0.075, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(43, 31, 82)}):Play()
-				end
-			end)
-
-			local SubTabBtnIcon = Instance.new("ImageLabel")
-			SubTabBtnIcon.Name = "SubTabBtnIcon"
-			SubTabBtnIcon.Parent = SubTabBtnInline
-			SubTabBtnIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			SubTabBtnIcon.BackgroundTransparency = 1.000
-			SubTabBtnIcon.BorderSizePixel = 0
-			SubTabBtnIcon.Position = UDim2.new(0, 3, 0.5, -9)
-			SubTabBtnIcon.Size = UDim2.new(0, 18, 0, 18)
-			SubTabBtnIcon.Image = "http://www.roblox.com/asset/?id=" .. AssID
-
-			local SubTabBtnInlineCorner = Instance.new("UICorner")
-			SubTabBtnInlineCorner.CornerRadius = UDim.new(0, 4)
-			SubTabBtnInlineCorner.Name = "SubTabBtnInlineCorner"
-			SubTabBtnInlineCorner.Parent = SubTabBtnInline
-
-			local SubTabBtnTitle = Instance.new("TextLabel")
-			SubTabBtnTitle.Name = "SubTabBtnTitle"
-			SubTabBtnTitle.Parent = SubTabBtnInline
-			SubTabBtnTitle.AnchorPoint = Vector2.new(1, 0.5)
-			SubTabBtnTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			SubTabBtnTitle.BackgroundTransparency = 1.000
-			SubTabBtnTitle.ClipsDescendants = true
-			SubTabBtnTitle.Position = UDim2.new(1, -4, 0.5, 0)
-			SubTabBtnTitle.Size = UDim2.new(1, -30, 1, 1)
-			SubTabBtnTitle.Font = Enum.Font.Gotham
-			SubTabBtnTitle.Text = title
-			SubTabBtnTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-			SubTabBtnTitle.TextSize = 12.000
-			SubTabBtnTitle.TextXAlignment = Enum.TextXAlignment.Right
-
+		local function BuildItems()
 			local Left = Instance.new("ScrollingFrame")
 			Left.Name = "Left"
 			Left.ClipsDescendants = false
-			Left.Parent = AllSubPagesFolder
+			Left.Parent = PageItems
 			Left.AnchorPoint = Vector2.new(0, 0.5)
 			Left.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 			Left.BackgroundTransparency = 1.000
 			Left.Position = UDim2.new(0, 0, 0.5, 0)
 			Left.Size = UDim2.new(0.5, 0, 1, 0)
-			Left.Visible = false
+			Left.Visible = true
 			--Left.ZIndex = 4
 			-- 
 			Left.BorderSizePixel = 0
@@ -1134,13 +1133,13 @@ function lib:Create(ver, size, hidekey)
 			local Right = Instance.new("ScrollingFrame")
 			Right.Name = "Right"
 			Right.ClipsDescendants = false
-			Right.Parent = AllSubPagesFolder
+			Right.Parent = PageItems
 			Right.AnchorPoint = Vector2.new(1, 0.5)
 			Right.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 			Right.BackgroundTransparency = 1.000
 			Right.Position = UDim2.new(1, -1, 0.5, 0)
 			Right.Size = UDim2.new(0.5, -2, 1, 0)
-			Right.Visible = false
+			Right.Visible = true
 			--Right.ZIndex = 4
 			Right.BorderSizePixel = 0
 			Right.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -1153,18 +1152,6 @@ function lib:Create(ver, size, hidekey)
 			RightListing.HorizontalAlignment = Enum.HorizontalAlignment.Left
 			RightListing.SortOrder = Enum.SortOrder.LayoutOrder
 
-			local SubPageFade = Instance.new("Frame")
-			SubPageFade.Name = "SubPageFade"
-			SubPageFade.Parent = MainFrame
-			SubPageFade.AnchorPoint = Vector2.new(1, 1)
-			SubPageFade.BackgroundColor3 = Color3.fromRGB(23, 20, 41)
-			SubPageFade.BackgroundTransparency = 1
-			SubPageFade.BorderSizePixel = 0
-			SubPageFade.Position = UDim2.new(1, 0, 1, 0)
-			SubPageFade.Size = UDim2.new(1, -80, 1, -190)
-			SubPageFade.ZIndex = 99
-			SubPageFade.Visible = true
-			
 			local FadeImage2 = Instance.new("ImageLabel",PageItems)
 			FadeImage2["Name"] = "FadeImage2"
 			FadeImage2["ImageColor3"] = Color3.new(0.0901961, 0.0784314, 0.160784)
@@ -1180,34 +1167,6 @@ function lib:Create(ver, size, hidekey)
 			FadeImage2["BorderSizePixel"] = 0
 			FadeImage2["BackgroundColor3"] = Color3.new(0, 0, 0)
 
-			SubTabBtnInteract.Activated:Connect(function()
-				for i, v in next, AllSubPagesFolder:GetChildren() do
-					coroutine.wrap(function()
-						wait(lib.Animations.AnimSpeed)
-						v.Visible = false
-					end)()
-				end
-				coroutine.wrap(function()
-					--LibraryFunctions:Tween(FadeImage2,{ImageTransparency=0},2)
-					wait(lib.Animations.AnimSpeed)
-					Left.Visible = true
-					Right.Visible = true
-				end)()
-
-				coroutine.wrap(function()
-					TweenService:Create(SubPageFade, TweenInfo.new(lib.Animations.AnimSpeed, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 0}):Play()
-					wait(lib.Animations.AnimSpeed)
-					TweenService:Create(SubPageFade, TweenInfo.new(lib.Animations.AnimSpeed, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
-				end)()
-
-				for i, v in next, AllSubTabBtns:GetDescendants() do
-					if v.Name == 'SubTabBtnInline' then
-						TweenService:Create(v, TweenInfo.new(lib.Animations.AnimSpeed, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundColor3 = Color3.fromRGB(23, 20, 41)}):Play()
-					end
-				end
-				TweenService:Create(SubTabBtnInline, TweenInfo.new(lib.Animations.AnimSpeed, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundColor3 = Color3.fromRGB(107, 89, 222)}):Play()
-			end)
-			
 		    --LeftListing:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 			--	Left.CanvasSize = UDim2.new(0, LeftListing.AbsoluteContentSize.X, 0, LeftListing.AbsoluteContentSize.Y)
 			--end)
@@ -2130,6 +2089,7 @@ function lib:Create(ver, size, hidekey)
 
 			function items:Slider(side, text, start, min, max, inc, callback)
 				local dragging = false
+				local dragInput = nil
 				--start = start or min --or 5
 				local Slider = Instance.new("Frame")
 				Slider.Name = tostring(text)
@@ -2166,6 +2126,7 @@ function lib:Create(ver, size, hidekey)
 				local SlideBack = Instance.new("Frame")
 				SlideBack.Name = "SlideBack"
 				SlideBack.Parent = Slider
+				SlideBack.Active = true
 				SlideBack.AnchorPoint = Vector2.new(1, 0.5)
 				SlideBack.BackgroundColor3 = Color3.fromRGB(33, 28, 64)
 				SlideBack.BorderSizePixel = 0
@@ -2175,6 +2136,7 @@ function lib:Create(ver, size, hidekey)
 				local SlideCircle = Instance.new("Frame")
 				SlideCircle.Name = "SlideCircle"
 				SlideCircle.Parent = SlideBack
+				SlideCircle.Active = true
 				SlideCircle.AnchorPoint = Vector2.new(0.5, 0.5)
 				SlideCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				SlideCircle.Position = UDim2.new(0, 0, 0.5, 0)
@@ -2189,6 +2151,7 @@ function lib:Create(ver, size, hidekey)
 				local SlideBackLight = Instance.new("Frame")
 				SlideBackLight.Name = "SlideBackLight"
 				SlideBackLight.Parent = SlideBack
+				SlideBackLight.Active = true
 				SlideBackLight.AnchorPoint = Vector2.new(0, 0.5)
 				SlideBackLight.BackgroundColor3 = Color3.fromRGB(107, 89, 222)
 				SlideBackLight.BorderSizePixel = 0
@@ -2236,13 +2199,33 @@ function lib:Create(ver, size, hidekey)
 					print('please select a side for the ' .. text .. ' slider')
 				end
 
-				local function move(Input) 
+				local function setScrollEnabled(enabled)
+					pcall(function()
+						if Left and Left:IsA("ScrollingFrame") then
+							Left.ScrollingEnabled = enabled
+						end
+					end)
+					pcall(function()
+						if Right and Right:IsA("ScrollingFrame") then
+							Right.ScrollingEnabled = enabled
+						end
+					end)
+				end
+
+				local function move(Input, animate)
 					local XSize = math.clamp((Input.Position.X - SlideBack.AbsolutePosition.X) / SlideBack.AbsoluteSize.X, 0, 1)
 					local Increment = inc and (max / ((max - min) / (inc * 4))) or (max >= 50 and max / ((max - min) / 4)) or (max >= 25 and max / ((max - min) / 2)) or (max / (max - min))
-					local SizeRounded = UDim2.new((math.round(XSize * ((max / Increment) * 4)) / ((max / Increment) * 4)), 0, 0, 2)
-					local PosRoundedCircle = UDim2.new((math.round(XSize * ((max / Increment) * 4)) / ((max / Increment) * 4)), 0, 0.5, 0)
-					SlideBackLight:TweenSize(SizeRounded, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
-					SlideCircle:TweenPosition(PosRoundedCircle, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+					local denom = ((max / Increment) * 4)
+					local stepped = (math.round(XSize * denom) / denom)
+					local SizeRounded = UDim2.new(stepped, 0, 0, 2)
+					local PosRoundedCircle = UDim2.new(stepped, 0, 0.5, 0)
+					if animate then
+						TweenService:Create(SlideBackLight, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = SizeRounded}):Play()
+						TweenService:Create(SlideCircle, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = PosRoundedCircle}):Play()
+					else
+						SlideBackLight.Size = SizeRounded
+						SlideCircle.Position = PosRoundedCircle
+					end
 					local Val = math.round((((SizeRounded.X.Scale * max) / max) * (max - min) + min) * 20) / 20
 					SliderValue.Text = tostring(Val)
 					pcall(callback, tonumber(Val))
@@ -2259,45 +2242,68 @@ function lib:Create(ver, size, hidekey)
 				end
 				SetStart(start)
 
+				local function beginDrag(input)
+					dragging = true
+					dragInput = input
+					setScrollEnabled(false)
+					move(input, false)
+				end
+				local function endDrag(input)
+					dragging = false
+					dragInput = nil
+					setScrollEnabled(true)
+					if input then
+						move(input, true)
+					end
+				end
+
 				SlideCircle.InputBegan:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-						dragging = true
-						move(input)
+						beginDrag(input)
 					end
 				end)
 				SlideCircle.InputEnded:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-						dragging = false
-						move(input)
+						endDrag(input)
 					end
 				end)
 				SlideBack.InputBegan:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-						dragging = true
-						move(input)
+						beginDrag(input)
 					end
 				end)
 				SlideBack.InputEnded:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-						dragging = false
-						move(input)
+						endDrag(input)
 					end
 				end)
 				SlideBackLight.InputBegan:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-						dragging = true
-						move(input)
+						beginDrag(input)
 					end
 				end)
 				SlideBackLight.InputEnded:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-						dragging = false
-						move(input)
+						endDrag(input)
 					end
 				end)
-				game:GetService("UserInputService").InputChanged:Connect(function(input)
-					if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-						move(input)
+				LibraryFunctions:Connect(game:GetService("UserInputService").InputChanged, function(input)
+					if not dragging then return end
+					if dragInput and dragInput.UserInputType == Enum.UserInputType.Touch then
+						if input ~= dragInput then return end
+						move(input, false)
+						return
+					end
+					if input.UserInputType == Enum.UserInputType.MouseMovement then
+						move(input, false)
+					end
+				end)
+				LibraryFunctions:Connect(game:GetService("UserInputService").InputEnded, function(input)
+					if not dragging then return end
+					if dragInput and input == dragInput then
+						endDrag(input)
+					elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+						endDrag(input)
 					end
 				end)
 				SliderValue.FocusLost:Connect(function(ep)
@@ -2680,7 +2686,7 @@ function lib:Create(ver, size, hidekey)
 			---JUST STUFF---
 			return items
 		end
-		return subtabs
+		return BuildItems()
 	end
 	return tabs
 end
