@@ -1273,57 +1273,31 @@ function lib:Create(ver, size, hidekey)
 			function items:Label(side, text, image)
 				local Label = Instance.new("Frame")
 				Label.Name = tostring(text)
-				Label.BackgroundColor3 = Color3.fromRGB(23, 20, 46)
-				Label.BackgroundTransparency = 0.35
+				Label.BackgroundTransparency = 1
 				Label.BorderSizePixel = 0
-				Label.Size = UDim2.new(1, 0, 0, 36)
-
-				local LabelCorner = Instance.new("UICorner")
-				LabelCorner.CornerRadius = UDim.new(0, 6)
-				LabelCorner.Parent = Label
-
-				local LabelOutline = Instance.new("UIStroke")
-				LabelOutline.Enabled = true
-				LabelOutline.Parent = Label
-				LabelOutline.Color = Color3.fromRGB(31, 26, 61)
-				LabelOutline.LineJoinMode = Enum.LineJoinMode.Miter
-				LabelOutline.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-				LabelOutline.Thickness = 1
-				LabelOutline.Transparency = 0.25
+				Label.Size = UDim2.new(1, 0, 0, 22)
 
 				local LabelTitle = Instance.new("TextLabel")
 				LabelTitle.Name = "LabelTitle"
 				LabelTitle.Parent = Label
-				LabelTitle.AnchorPoint = Vector2.new(1, 0.5)
-				LabelTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				LabelTitle.BackgroundTransparency = 1.000
-				LabelTitle.Position = UDim2.new(1, 0, 0.5, 0)
-				LabelTitle.Size = UDim2.new(1, -40, 1, 0)
-				LabelTitle.Font = Enum.Font.GothamMedium
-				LabelTitle.Text = text
-				LabelTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-				LabelTitle.TextSize = 12.000
+				LabelTitle.BackgroundTransparency = 1
+				LabelTitle.Position = UDim2.new(0, 6, 0, 0)
+				LabelTitle.Size = UDim2.new(1, -12, 1, 0)
+				LabelTitle.Font = Enum.Font.GothamBold
+				LabelTitle.Text = string.upper(text)
+				LabelTitle.TextColor3 = Color3.fromRGB(107, 89, 222)
+				LabelTitle.TextSize = 11
 				LabelTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-				local LabelArrows = Instance.new("TextLabel")
-				LabelArrows.Name = "LabelArrows"
-				LabelArrows.Parent = Label
-				LabelArrows.AnchorPoint = Vector2.new(0, 0.5)
-				LabelArrows.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				LabelArrows.BackgroundTransparency = 1.000
-				LabelArrows.Position = UDim2.new(0, 21, 0.5, -1)
-				LabelArrows.Size = UDim2.new(0, 10, 0, 20)
-				LabelArrows.Font = Enum.Font.Ubuntu
-				LabelArrows.Text = "»"
-				LabelArrows.TextColor3 = Color3.fromRGB(107, 89, 222)
-				LabelArrows.TextSize = 20
-				LabelArrows.TextXAlignment = Enum.TextXAlignment.Left
-
-				local LabelGradient = Instance.new("UIGradient")
-				LabelGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(23, 20, 46)), ColorSequenceKeypoint.new(0.08, Color3.fromRGB(26, 23, 56)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(26, 23, 56))}
-				LabelGradient.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0.00, 0.85), NumberSequenceKeypoint.new(1.00, 0.10)}
-				LabelGradient.Name = "LabelGradient"
-				LabelGradient.Parent = Label
+				local LabelLine = Instance.new("Frame")
+				LabelLine.Name = "LabelLine"
+				LabelLine.Parent = Label
+				LabelLine.BackgroundColor3 = Color3.fromRGB(107, 89, 222)
+				LabelLine.BackgroundTransparency = 0.6
+				LabelLine.BorderSizePixel = 0
+				LabelLine.AnchorPoint = Vector2.new(0, 1)
+				LabelLine.Position = UDim2.new(0, 0, 1, 0)
+				LabelLine.Size = UDim2.new(1, 0, 0, 1)
 
 				local label = {}
 
@@ -2474,14 +2448,16 @@ function lib:Create(ver, size, hidekey)
 				DropdownTitle.AnchorPoint = Vector2.new(0, 0.5)
 				DropdownTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				DropdownTitle.BackgroundTransparency = 1.000
-				DropdownTitle.ClipsDescendants = true
-				DropdownTitle.Position = UDim2.new(0, 21, 0.5, 0)
-				DropdownTitle.Size = UDim2.new(0, 180, 1, 0)
+				DropdownTitle.ClipsDescendants = false
+				DropdownTitle.Position = UDim2.new(0, 10, 0.5, 0)
+				-- right edge stops 12px before the drop frame (which is 173+12=185 from right)
+				DropdownTitle.Size = UDim2.new(1, -198, 1, 0)
 				DropdownTitle.Font = Enum.Font.GothamMedium
 				DropdownTitle.Text = text
 				DropdownTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 				DropdownTitle.TextSize = 12.000
 				DropdownTitle.TextXAlignment = Enum.TextXAlignment.Left
+				DropdownTitle.TextTruncate = Enum.TextTruncate.AtEnd
 
 				local DropdownDropFrame = Instance.new("Frame")
 				DropdownDropFrame.Name = "DropdownDropFrame"
