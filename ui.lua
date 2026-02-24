@@ -2317,23 +2317,38 @@ function lib:Create(ver, size, hidekey)
 					end)
 				end
 
-				local function move(Input, animate)
-					local XSize = math.clamp((Input.Position.X - SlideBack.AbsolutePosition.X) / SlideBack.AbsoluteSize.X, 0, 1)
-					local Increment = inc and (max / ((max - min) / (inc * 4))) or (max >= 50 and max / ((max - min) / 4)) or (max >= 25 and max / ((max - min) / 2)) or (max / (max - min))
-					local denom = ((max / Increment) * 4)
-					local stepped = (math.round(XSize * denom) / denom)
-					local SizeRounded = UDim2.new(stepped, 0, 0, 2)
-					local PosRoundedCircle = UDim2.new(stepped, 0, 0.5, 0)
-					if animate then
-						TweenService:Create(SlideBackLight, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = SizeRounded}):Play()
-						TweenService:Create(SlideCircle, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = PosRoundedCircle}):Play()
+				local function moveFromX(screenX, animate)
+					local absPos = SlideBack.AbsolutePosition.X
+					local absSize = SlideBack.AbsoluteSize.X
+					if absSize == 0 then return end
+					local XSize = math.clamp((screenX - absPos) / absSize, 0, 1)
+					local stepped
+					if inc and inc > 0 then
+						local steps = (max - min) / inc
+						stepped = math.round(XSize * steps) / steps
 					else
-						SlideBackLight.Size = SizeRounded
-						SlideCircle.Position = PosRoundedCircle
+						stepped = XSize
 					end
-					local Val = math.round((((SizeRounded.X.Scale * max) / max) * (max - min) + min) * 20) / 20
-					SliderValue.Text = tostring(Val)
-					pcall(callback, tonumber(Val))
+					stepped = math.clamp(stepped, 0, 1)
+					local Val = min + stepped * (max - min)
+					if inc and inc > 0 then
+						Val = math.round(Val / inc) * inc
+					end
+					Val = math.clamp(Val, min, max)
+					local scale = (Val - min) / (max - min)
+					if animate then
+						TweenService:Create(SlideBackLight, TweenInfo.new(0.06, Enum.EasingStyle.Quad), {Size = UDim2.new(scale, 0, 0, 2)}):Play()
+						TweenService:Create(SlideCircle, TweenInfo.new(0.06, Enum.EasingStyle.Quad), {Position = UDim2.new(scale, 0, 0.5, 0)}):Play()
+					else
+						SlideBackLight.Size = UDim2.new(scale, 0, 0, 2)
+						SlideCircle.Position = UDim2.new(scale, 0, 0.5, 0)
+					end
+					SliderValue.Text = tostring(math.round(Val * 100) / 100)
+					pcall(callback, Val)
+				end
+
+				local function move(Input, animate)
+					moveFromX(Input.Position.X, animate)
 				end
 				local cfg = {Value = start}
 				function SetStart(val)
@@ -2357,9 +2372,8 @@ function lib:Create(ver, size, hidekey)
 					dragging = false
 					dragInput = nil
 					setScrollEnabled(true)
-					if input then
-						move(input, true)
-					end
+					local mx = LibraryFunctions:GetMouseLocation().X
+					moveFromX(mx, true)
 				end
 
 				SlideCircle.InputBegan:Connect(function(input)
@@ -2394,13 +2408,10 @@ function lib:Create(ver, size, hidekey)
 				end)
 				LibraryFunctions:Connect(game:GetService("UserInputService").InputChanged, function(input)
 					if not dragging then return end
-					if dragInput and dragInput.UserInputType == Enum.UserInputType.Touch then
-						if input ~= dragInput then return end
-						move(input, false)
-						return
-					end
-					if input.UserInputType == Enum.UserInputType.MouseMovement then
-						move(input, false)
+					local t = input.UserInputType
+					if t == Enum.UserInputType.MouseMovement or t == Enum.UserInputType.Touch then
+						local mx = LibraryFunctions:GetMouseLocation().X
+						moveFromX(mx, false)
 					end
 				end)
 				LibraryFunctions:Connect(game:GetService("UserInputService").InputEnded, function(input)
@@ -2539,16 +2550,22 @@ function lib:Create(ver, size, hidekey)
 				DropdownSelected.TextSize = 12.000
 				DropdownSelected.TextXAlignment = Enum.TextXAlignment.Left
 
+				-- calculate max list height (cap at 160, or fewer items * 23)
+				local itemH = 23
+				local listH = math.min(#options * (itemH + 1), 160)
+
 				local DropdownChildFrameOutline = Instance.new("Frame")
 				DropdownChildFrameOutline.Name = "DropdownChildFrame"
 				DropdownChildFrameOutline.Parent = DropdownDropFrame
-				DropdownChildFrameOutline.AnchorPoint = Vector2.new(0.5, 0)
+				DropdownChildFrameOutline.AnchorPoint = Vector2.new(0, 0)
 				DropdownChildFrameOutline.BackgroundColor3 = Color3.fromRGB(34, 28, 64)
-				DropdownChildFrameOutline.Position = UDim2.new(0.5, 0, 0, 0)
-				DropdownChildFrameOutline.Size = UDim2.new(1, 0, 0, 100)
+				-- sit right below the header row (full height of DropdownDropFrame + 4px gap)
+				DropdownChildFrameOutline.Position = UDim2.new(0, 0, 1, 4)
+				DropdownChildFrameOutline.Size = UDim2.new(1, 0, 0, listH + 4)
 				DropdownChildFrameOutline.BackgroundTransparency = 1
 				DropdownChildFrameOutline.Visible = false
 				DropdownChildFrameOutline.ZIndex = 99
+				DropdownChildFrameOutline.ClipsDescendants = false
 
 				local DropdownChildFrameOutlineCorner = Instance.new("UICorner")
 				DropdownChildFrameOutlineCorner.CornerRadius = UDim.new(0, 4)
@@ -2579,8 +2596,11 @@ function lib:Create(ver, size, hidekey)
 				DropdownChildFrameScroll.BackgroundTransparency = 1.000
 				DropdownChildFrameScroll.BorderSizePixel = 0
 				DropdownChildFrameScroll.Position = UDim2.new(0.5, 0, 0.5, 0)
-				DropdownChildFrameScroll.Size = UDim2.new(1, 0, 1, -8)
-				DropdownChildFrameScroll.ScrollBarThickness = 0
+				DropdownChildFrameScroll.Size = UDim2.new(1, 0, 1, -4)
+				DropdownChildFrameScroll.ScrollBarThickness = 3
+				DropdownChildFrameScroll.ScrollBarImageColor3 = Color3.fromRGB(107, 89, 222)
+				DropdownChildFrameScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+				DropdownChildFrameScroll.ElasticBehavior = Enum.ElasticBehavior.Never
 				DropdownChildFrameScroll.ZIndex = 99
 
 				local DropdownChildFrameScrollListing = Instance.new("UIListLayout")
