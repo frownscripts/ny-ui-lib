@@ -2425,6 +2425,7 @@ function lib:Create(ver, size, hidekey)
 
 			function items:Dropdown(side, text, default, options, cb, multi)
 				local opened = false
+				options = options or {}
 				assert(type(options) == "table", "options must be a table")
 				assert(type(cb) == "function", "callback must be a function")
 
@@ -2524,7 +2525,7 @@ function lib:Create(ver, size, hidekey)
 				DropdownSelected.Size = UDim2.new(1, -24, 1, 0)
 				DropdownSelected.Visible = true
 				DropdownSelected.Font = Enum.Font.Gotham
-				DropdownSelected.Text = string.format(default)
+				DropdownSelected.Text = tostring(default or "")
 				DropdownSelected.TextColor3 = Color3.fromRGB(255, 255, 255)
 				DropdownSelected.TextSize = 12.000
 				DropdownSelected.TextXAlignment = Enum.TextXAlignment.Left
@@ -2738,7 +2739,7 @@ function lib:Create(ver, size, hidekey)
 					DropdownBtn.Activated:Connect(function()
 						if (pressed) then return end
 						pressed = true
-						DropdownSelected.Text = string.format(opt)
+						DropdownSelected.Text = tostring(opt or "")
 						coroutine.wrap(cb)(opt)
 						toggle()
 						pressed = false
